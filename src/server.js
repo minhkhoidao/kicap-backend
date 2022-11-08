@@ -42,7 +42,7 @@ class Server {
   }
   router() {
     app.use('/api/v1/auth', authRouter);
-    app.use("/api/v1/private", privateRouter);
+    app.use('/api/v1/private', privateRouter);
   }
   listenServer() {
     const server = app.listen(PORT, () =>

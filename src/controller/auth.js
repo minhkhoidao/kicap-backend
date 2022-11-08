@@ -9,7 +9,7 @@ import User from '../models/User';
 import ErrorResponse from '../utils/errorResponse';
 import { sendEmail } from '../utils/sendEmail';
 import { sendToken } from '../utils/sendToken';
-
+import crypto from 'crypto';
 const register = async (req, res, next) => {
   const { username, email, password } = req.body;
   try {
@@ -27,7 +27,11 @@ const register = async (req, res, next) => {
 const login = async (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    return next(new ErrorResponse('Please provide an email and password', 400));
+    const errorHandle = new ErrorResponse(
+      'Please provide an email and password',
+      400
+    );
+    return next(errorHandle);
   }
   try {
     const user = await User.findOne({ email }).select('+password');
@@ -40,6 +44,7 @@ const login = async (req, res, next) => {
     }
     sendToken(user, 200, res);
   } catch (error) {
+    console.log({ error }, 'error');
     next(error);
   }
 };
@@ -54,7 +59,6 @@ const forgotPassword = async (req, res, next) => {
     const resetToken = user.getResetPasswordToken();
     await user.save();
     const resetUrl = `http://localhost:2812/resetpassword/${resetToken}`;
-    console.log(resetToken);
     const message = `
       <h1>You have requested a password reset</h1>
       <p>Please go to this link to reset your password</p>
@@ -87,6 +91,7 @@ const resetPassword = async (req, res, next) => {
     .createHash('sha256')
     .update(req.params.resetToken)
     .digest('hex');
+
   try {
     const user = await User.findOne({
       resetPasswordToken,
@@ -98,6 +103,7 @@ const resetPassword = async (req, res, next) => {
     user.password = req.body.password;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
+    console.log(req.body, 'request');
     await user.save();
 
     res.status(201).json({

@@ -3,8 +3,8 @@
 import ErrorResponse from '../utils/errorResponse';
 
 const errorHandler = (err, req, res, next) => {
+  console.log(res, 'errorssssss');
   let error = { ...err };
-  console.log(err,'error')
   error.message = err.message;
 
   if (err.code === 11000) {
@@ -16,8 +16,6 @@ const errorHandler = (err, req, res, next) => {
     const message = Object.values(err.errors).map((val) => val.message);
     error = new ErrorResponse(message, 400);
   }
-
-  console.log(error.message);
 
   res.status(error.statusCode || 500).json({
     success: false,
